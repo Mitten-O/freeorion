@@ -54,3 +54,4 @@ endmacro ()
 
 make_gigi_test(text_control TestTextControl.cpp)
 make_gigi_test(rich_text_control TestRichTextControl.cpp)
+make_gigi_test(scroll_panel TestScrollPanel.cpp)
