@@ -53,3 +53,4 @@ macro (make_gigi_test name)
 endmacro ()
 
 make_gigi_test(text_control TestTextControl.cpp)
+make_gigi_test(rich_text_control TestRichTextControl.cpp)
