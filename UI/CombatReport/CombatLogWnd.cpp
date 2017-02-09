@@ -9,6 +9,7 @@
 
 #include "../../client/human/HumanClientApp.h"
 #include "../../combat/CombatLogManager.h"
+#include "../../combat/CombatEvents.h"
 #include "../../universe/System.h"
 #include "../../universe/UniverseObject.h"
 #include "../../universe/Enums.h"
@@ -317,6 +318,16 @@ LinkText * CombatLogWnd::Impl::DecorateLinkText(std::string const & text) {
     return links;
 }
 
+bool IsFighterDestruction( ConstCombatEventPtr& event ){
+
+  // Check if the event is an incapacitation event.
+  const IncapacitationEvent* incapacitation = dynamic_cast<const IncapacitationEvent*>(event.get());
+  if (incapacitation && incapacitation->IsFighterDestruction()) {
+    return true;
+  }
+  return false;
+}
+
 /** Fill \p new_logs with pointers to the flat log contents of \p
     event using the pre-calculated \p details.*/
 void CombatLogWnd::Impl::PopulateWithFlatLogs(GG::X w, int viewing_empire_id, std::vector<GG::Wnd*> &new_logs,
@@ -328,9 +339,11 @@ void CombatLogWnd::Impl::PopulateWithFlatLogs(GG::X w, int viewing_empire_id, st
 
     if (!event->AreSubEventsEmpty(viewing_empire_id)) {
         for (ConstCombatEventPtr sub_event : event->SubEvents(viewing_empire_id)) {
-            std::vector<GG::Wnd*> flat_logs =
-                MakeCombatLogPanel(w, viewing_empire_id, sub_event);
-            new_logs.insert(new_logs.end(), flat_logs.begin(), flat_logs.end());
+	    if (!IsFighterDestruction(sub_event)) {
+	      std::vector<GG::Wnd*> flat_logs =
+		  MakeCombatLogPanel(w, viewing_empire_id, sub_event);
+	      new_logs.insert(new_logs.end(), flat_logs.begin(), flat_logs.end());
+	    }
         }
     }
 }
