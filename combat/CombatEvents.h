@@ -272,6 +272,9 @@ struct FO_COMMON_API IncapacitationEvent : public CombatEvent {
 
     boost::optional<int> PrincipalFaction(int viewing_empire_id) const override;
 
+    /// Returns true if this the incapacitation of a fighter.
+    bool IsFighterDestruction() const;
+
     int bout;
     int object_id;
     int object_owner_id;

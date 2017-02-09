@@ -740,6 +740,13 @@ boost::optional<int> IncapacitationEvent::PrincipalFaction(int viewing_empire_id
     return object_owner_id;
 }
 
+bool IncapacitationEvent::IsFighterDestruction() const{
+  std::shared_ptr<const UniverseObject> object = GetUniverseObject(object_id);
+
+  // Fighter events have below zero ids and no actual objects.
+  return !object && object_id < 0;
+}
+
 
 template <class Archive>
 void IncapacitationEvent::serialize (Archive& ar, const unsigned int version) {
