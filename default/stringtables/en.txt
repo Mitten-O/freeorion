@@ -4128,6 +4128,11 @@ ENC_COMBAT_ATTACK_SIMPLE_STR
 ENC_COMBAT_LAUNCH_STR
 %1% launches %3% %2%
 
+# %1% link to the empire whose figters were destroyed
+# %2% number of fighters destroyed
+ENC_COMBAT_FIGHTER_DESTRUCTIONS
+%empire% loses %rawtext% fighters
+
 # %1% link to the unit, which recovers the fighters.
 # %2% name of the fighters recovered.
 # %3% amount of fighters recovered.

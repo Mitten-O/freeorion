@@ -60,6 +60,8 @@ public:
     GG::Flags<GG::TextFormat> m_text_format_flags;
     std::shared_ptr<GG::Font> m_font;
 
+private:
+    void InsertAggregates(std::vector< Wnd* >& new_logs, const std::map< int, int >& fighter_destructions_by_empire);
 };
 
 namespace {
@@ -337,15 +339,46 @@ void CombatLogWnd::Impl::PopulateWithFlatLogs(GG::X w, int viewing_empire_id, st
         new_logs.push_back(DecorateLinkText(details));
     }
 
+    std::map<int, int> fighter_destructions_by_empire;
+
     if (!event->AreSubEventsEmpty(viewing_empire_id)) {
         for (ConstCombatEventPtr sub_event : event->SubEvents(viewing_empire_id)) {
-	    if (!IsFighterDestruction(sub_event)) {
+
+	    // Aggregate fighter destructions.
+	    const IncapacitationEvent* incapacitation = dynamic_cast<const IncapacitationEvent*>(sub_event.get());
+	    if (incapacitation && incapacitation->IsFighterDestruction()) {
+	      // Aggregate fighter destructions instead of listing the separately,
+	      int owner = incapacitation->object_owner_id;
+
+	      if (fighter_destructions_by_empire.find(owner) == fighter_destructions_by_empire.end()) {
+		fighter_destructions_by_empire[owner]=0;
+	      }
+
+	      fighter_destructions_by_empire[owner]++;
+
+	    } else {
+	      // Other events get their own combat log panels.
 	      std::vector<GG::Wnd*> flat_logs =
 		  MakeCombatLogPanel(w, viewing_empire_id, sub_event);
 	      new_logs.insert(new_logs.end(), flat_logs.begin(), flat_logs.end());
 	    }
         }
     }
+
+    if (!fighter_destructions_by_empire.empty()) {
+      InsertAggregates(new_logs, fighter_destructions_by_empire);
+    }
+}
+
+void CombatLogWnd::Impl::InsertAggregates(std::vector< Wnd* >& new_logs, const std::map< int, int >& fighter_destructions_by_empire) {
+  for (const std::pair<int, int>& empire_destroyed: fighter_destructions_by_empire) {
+
+    VarText description("ENC_COMBAT_FIGHTER_DESTRUCTIONS");
+    description.AddVariable(VarText::EMPIRE_ID_TAG, std::to_string(empire_destroyed.first));
+    description.AddVariable(VarText::RAW_TEXT_TAG, std::to_string(empire_destroyed.second));
+
+    new_logs.push_back(DecorateLinkText(description.GetText()));
+  }
 }
 
 
